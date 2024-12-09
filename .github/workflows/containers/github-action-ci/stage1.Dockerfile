@@ -13,7 +13,10 @@ RUN apt-get update && \
     ninja-build \
     python3 \
     git \
-    curl
+    curl \
+    unzip
+    
+RUN curl -O -L https://dl.google.com/android/repository/android-ndk-r27c-linux.zip && unzip android-ndk-r27c-linux.zip
 
 RUN curl -O -L https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-$LLVM_VERSION.tar.gz && tar -xf llvmorg-$LLVM_VERSION.tar.gz
 
@@ -37,6 +40,14 @@ RUN cmake -B ./build -G Ninja ./llvm \
   -DLLVM_ENABLE_PROJECTS="bolt;clang;lld;clang-tools-extra" \
   -DLLVM_DISTRIBUTION_COMPONENTS="lld;compiler-rt;clang-format;scan-build" \
   -DCLANG_DEFAULT_LINKER="lld" \
-  -DBOOTSTRAP_CLANG_PGO_TRAINING_DATA_SOURCE_DIR=/llvm-project-llvmorg-$LLVM_VERSION/llvm
+  -DBOOTSTRAP_CLANG_PGO_TRAINING_DATA_SOURCE_DIR=/llvm-project-llvmorg-$LLVM_VERSION/llvm \
+  -DCMAKE_TOOLCHAIN_FILE="../android-ndk-r27c/build/cmake/android.toolchain.cmake" \
+  -DANDROID_ABI="arm64-v8a" \
+  -DANDROID_NDK="../android-ndk-r27c" \
+  -DANDROID_PLATFORM="android-21" \
+  -DCMAKE_ANDROID_ARCH_ABI="arm64-v8a" \
+  -DCMAKE_ANDROID_NDK="../android-ndk-r27c" \
+  -DCMAKE_SYSTEM_NAME="Android" \
+  -DCMAKE_SYSTEM_VERSION="21"
 
 RUN ninja -C ./build stage2-instrumented-clang stage2-instrumented-lld
