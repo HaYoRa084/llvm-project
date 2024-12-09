@@ -15,7 +15,8 @@ RUN apt-get update && \
     python3 \
     git \
     curl \
-    unzip
+    unzip \
+    gcc-multilib
     
 RUN curl -O -L https://dl.google.com/android/repository/android-ndk-r27c-linux.zip && unzip android-ndk-r27c-linux.zip -d /opt
 
