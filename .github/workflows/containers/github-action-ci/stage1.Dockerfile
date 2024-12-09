@@ -1,5 +1,6 @@
 FROM docker.io/library/ubuntu:22.04 as base
 ENV LLVM_SYSROOT=/opt/llvm
+ENV NDK_HOME=/opt/android-ndk-r27c
 
 FROM base as stage1-toolchain
 ENV LLVM_VERSION=19.1.5
@@ -16,7 +17,7 @@ RUN apt-get update && \
     curl \
     unzip
     
-RUN curl -O -L https://dl.google.com/android/repository/android-ndk-r27c-linux.zip && unzip android-ndk-r27c-linux.zip
+RUN curl -O -L https://dl.google.com/android/repository/android-ndk-r27c-linux.zip && unzip android-ndk-r27c-linux.zip -d /opt
 
 RUN curl -O -L https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-$LLVM_VERSION.tar.gz && tar -xf llvmorg-$LLVM_VERSION.tar.gz
 
@@ -41,12 +42,12 @@ RUN cmake -B ./build -G Ninja ./llvm \
   -DLLVM_DISTRIBUTION_COMPONENTS="lld;compiler-rt;clang-format;scan-build" \
   -DCLANG_DEFAULT_LINKER="lld" \
   -DBOOTSTRAP_CLANG_PGO_TRAINING_DATA_SOURCE_DIR=/llvm-project-llvmorg-$LLVM_VERSION/llvm \
-  -DCMAKE_TOOLCHAIN_FILE="../android-ndk-r27c/build/cmake/android.toolchain.cmake" \
+  -DCMAKE_TOOLCHAIN_FILE="$NDK_HOME/build/cmake/android.toolchain.cmake" \
   -DANDROID_ABI="arm64-v8a" \
-  -DANDROID_NDK="../android-ndk-r27c" \
+  -DANDROID_NDK="$NDK_HOME" \
   -DANDROID_PLATFORM="android-21" \
   -DCMAKE_ANDROID_ARCH_ABI="arm64-v8a" \
-  -DCMAKE_ANDROID_NDK="../android-ndk-r27c" \
+  -DCMAKE_ANDROID_NDK="$NDK_HOME" \
   -DCMAKE_SYSTEM_NAME="Android" \
   -DCMAKE_SYSTEM_VERSION="21"
 
